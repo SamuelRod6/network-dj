@@ -1,0 +1,46 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block title %} Following {% endblock %}
+
+{% block body %}
+  <br>
+  <h2 class='text-center'>Following</h2>
+  <br>
+  <!-- Posts -->
+  <div class="container">
+    {% for post in posts %}
+      <div class="card">
+        <div class="card-body" id="post-{{post.id}}">
+          <h5 class="card-title"><a href="{% url 'profile' post.creator %}">{{ post.creator }}</a></h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ post.date }}</h6>
+          <br>
+          <p class="card-text">{{ post.content }}</p>
+          <p name='likes'>{{ post.liked_by.count }} Likes</p>
+          {% if user.is_authenticated and user in post.liked_by.all %}
+            <button class="btn btn-danger btn-sm" name="dislike" onclick="likePost('{{post.id}}', true)">Dislike</button>
+          {% elif user.is_authenticated %}
+            <button class="btn btn-primary btn-sm" name="like" onclick="likePost('{{post.id}}', false)">Like</button>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <h3 class="text-center">No posts here yet</h3>
+    {% endfor %}
+    <br>
+    <!-- Paginator -->
+    <div class="pagination justify-content-center">
+      <span class="step-links">
+          {% if posts.has_previous %}
+            <a class="btn btn-primary" href="?page={{ posts.previous_page_number }}">Previous</a>
+          {% endif %}
+          <span class="current">
+            Page {{ posts.number }} of {{ posts.paginator.num_pages }}
+          </span>
+          {% if posts.has_next %}
+            <a class="btn btn-primary" href="?page={{ posts.next_page_number }}">Next</a>
+          {% endif %}
+      </span>
+    </div>
+    <br>
+{% endblock %}

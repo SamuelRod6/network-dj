@@ -1,0 +1,63 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block title %} All Posts {% endblock %}
+
+{% block body %}
+  <br>
+  <h2 class="text-center">All Posts</h2>
+  <!-- New post -->
+  {% if user.is_authenticated %}
+    <div class="container">
+      <h3>New Post</h3>
+      <form class="form-group" action="{% url 'index' %}" method="post">
+        {% csrf_token %}
+        <input name="new_post" class="form-control" type="text" placeholder="What are you thinking?" autocomplete='off' autofocus>
+        <input id="send-button" class="btn btn-primary" type="submit" value="Post">
+      </form>
+    </div>
+  {% endif %}
+  <br>
+  <!-- Posts -->
+  <div class="container">
+    {% for post in posts %}
+      <div class="card">
+        <div class="card-body" id="post-{{post.id}}">
+          <h5 class="card-title"><a href="{% url 'profile' post.creator %}">{{ post.creator }}</a></h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ post.date }}</h6>
+          <br>
+          <p class="card-text" name='content'>{{ post.content }}</p>
+          <!-- Edit div -->
+          <div class="form-group" name="edit-window"></div>
+          <p name='likes'>{{ post.liked_by.count }} Likes</p>
+          {% if user.is_authenticated and user in post.liked_by.all %}
+            <button class="btn btn-danger btn-sm" name="dislike" onclick="likePost('{{post.id}}', true)">Dislike</button>
+          {% elif user.is_authenticated %}
+            <button class="btn btn-primary btn-sm" name="like" onclick="likePost('{{post.id}}', false)">Like</button>
+          {% endif %}
+          {% if user == post.creator %}
+            <button class="btn btn-link btn-sm left-align" onclick="editPost('{{post.id}}')">Edit</button>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <h3 class="text-center">No posts here yet</h3>
+    {% endfor %}
+    <br>
+    <!-- Paginator -->
+    <div class="pagination justify-content-center">
+      <span class="step-links">
+        {% if posts.has_previous %}
+          <a class="btn btn-primary" href="?page={{ posts.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span class="current">
+          Page {{ posts.number }} of {{ posts.paginator.num_pages }}
+        </span>
+        {% if posts.has_next %}
+          <a class="btn btn-primary" href="?page={{ posts.next_page_number }}">Next</a>
+        {% endif %}
+      </span>
+    </div>
+    <br>
+  </div>
+{% endblock %}
